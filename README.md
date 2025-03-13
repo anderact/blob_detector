@@ -44,7 +44,10 @@ To execute the blob detector program, use the following command:
 ```sh
 python blob_detector.py "path\to\the\video"
 ```
+### Controls
+- e: Press the key e to export video.
+- p: Press the key p to pause video.
+- q: Press the key q to quit the program.
+- (+ / -): Press the plus or minus buttons to increase or decrease delay of processing (slows the playback).
 ### 💀 To-Do
-- Fix and add verbose to the export of the video
-- Catch unwanted errors while manipulating blobs' parameters
-- Optimize the gif, wdym is 29 mb :sob:
+- improve controls and customization

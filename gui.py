@@ -5,33 +5,33 @@ class BlobDetectorGUI:
         self.detector = detector
         self.min_area = 500
         self.max_area = 5000
-        self.min_circularity = 50
-        self.max_circularity = 100
         self.min_convexity = 87
         self.max_convexity = 100
-        self.min_inertia_ratio = 10
-        self.max_inertia_ratio = 100
-        self.loop_video = 1
-        self.min_movement_threshold = 10
-        self.min_movement_threshold_small = 2
-        self.alpha = 100
+        self.alpha_video = 100  # Alpha for video
+        self.max_blobs = 10     # Maximum number of blobs to render
+        self.show_text = 1      # Show text (1 = On, 0 = Off)
+        self.loop_video = 1     # Loop video (1 = On, 0 = Off)
+        self.text_mode = 0      # 0 = Coordinates, 1 = Random Symbols, 2 = Custom Text
+        self.show_blobs = 1     # Show blobs (1 = On, 0 = Off)
+        self.show_lines = 1     # Show tracing lines (1 = On, 0 = Off)
+        self.custom_text = "Blob"  # Default custom text
         self.setup_trackbars()
 
     def setup_trackbars(self):
         cv2.namedWindow("Blob Detector with Tracing")
         cv2.createTrackbar("Min Area", "Blob Detector with Tracing", self.min_area, 5000, self.update_min_area)
         cv2.createTrackbar("Max Area", "Blob Detector with Tracing", self.max_area, 10000, self.update_max_area)
-        cv2.createTrackbar("Min Circularity", "Blob Detector with Tracing", self.min_circularity, 100, self.update_min_circularity)
-        cv2.createTrackbar("Max Circularity", "Blob Detector with Tracing", self.max_circularity, 100, self.update_max_circularity)
         cv2.createTrackbar("Min Convexity", "Blob Detector with Tracing", self.min_convexity, 100, self.update_min_convexity)
         cv2.createTrackbar("Max Convexity", "Blob Detector with Tracing", self.max_convexity, 100, self.update_max_convexity)
-        cv2.createTrackbar("Min Inertia Ratio", "Blob Detector with Tracing", self.min_inertia_ratio, 100, self.update_min_inertia_ratio)
-        cv2.createTrackbar("Max Inertia Ratio", "Blob Detector with Tracing", self.max_inertia_ratio, 100, self.update_max_inertia_ratio)
+        cv2.createTrackbar("Alpha Video", "Blob Detector with Tracing", self.alpha_video, 100, self.update_alpha_video)
+        cv2.createTrackbar("Max Blobs", "Blob Detector with Tracing", self.max_blobs, 50, self.update_max_blobs)
+        cv2.createTrackbar("Show Text", "Blob Detector with Tracing", self.show_text, 1, self.update_show_text)
         cv2.createTrackbar("Loop Video", "Blob Detector with Tracing", self.loop_video, 1, self.update_loop_video)
-        cv2.createTrackbar("Min Movement", "Blob Detector with Tracing", self.min_movement_threshold, 50, self.update_min_movement_threshold)
-        cv2.createTrackbar("Min Small Movement", "Blob Detector with Tracing", self.min_movement_threshold_small, 10, self.update_min_movement_threshold_small)
-        cv2.createTrackbar("Alpha", "Blob Detector with Tracing", self.alpha, 100, self.update_alpha)
+        cv2.createTrackbar("Text Mode", "Blob Detector with Tracing", self.text_mode, 2, self.update_text_mode)
+        cv2.createTrackbar("Show Blobs", "Blob Detector with Tracing", self.show_blobs, 1, self.update_show_blobs)
+        cv2.createTrackbar("Show Lines", "Blob Detector with Tracing", self.show_lines, 1, self.update_show_lines)
 
+    # Update methods for trackbars
     def update_min_area(self, value):
         self.min_area = max(1, min(value, self.max_area))
         cv2.setTrackbarPos("Min Area", "Blob Detector with Tracing", self.min_area)
@@ -41,16 +41,6 @@ class BlobDetectorGUI:
         self.max_area = max(self.min_area, min(value, 10000))
         cv2.setTrackbarPos("Max Area", "Blob Detector with Tracing", self.max_area)
         self.detector.params.maxArea = self.max_area
-
-    def update_min_circularity(self, value):
-        self.min_circularity = max(0, min(value, self.max_circularity))
-        cv2.setTrackbarPos("Min Circularity", "Blob Detector with Tracing", self.min_circularity)
-        self.detector.params.minCircularity = self.min_circularity / 100
-
-    def update_max_circularity(self, value):
-        self.max_circularity = max(self.min_circularity, min(value, 100))
-        cv2.setTrackbarPos("Max Circularity", "Blob Detector with Tracing", self.max_circularity)
-        self.detector.params.maxCircularity = self.max_circularity / 100
 
     def update_min_convexity(self, value):
         self.min_convexity = max(0, min(value, self.max_convexity))
@@ -62,28 +52,30 @@ class BlobDetectorGUI:
         cv2.setTrackbarPos("Max Convexity", "Blob Detector with Tracing", self.max_convexity)
         self.detector.params.maxConvexity = self.max_convexity / 100
 
-    def update_min_inertia_ratio(self, value):
-        self.min_inertia_ratio = max(0, min(value, self.max_inertia_ratio))
-        cv2.setTrackbarPos("Min Inertia Ratio", "Blob Detector with Tracing", self.min_inertia_ratio)
-        self.detector.params.minInertiaRatio = self.min_inertia_ratio / 100
+    def update_alpha_video(self, value):
+        self.alpha_video = max(0, min(value, 100))
+        cv2.setTrackbarPos("Alpha Video", "Blob Detector with Tracing", self.alpha_video)
 
-    def update_max_inertia_ratio(self, value):
-        self.max_inertia_ratio = max(self.min_inertia_ratio, min(value, 100))
-        cv2.setTrackbarPos("Max Inertia Ratio", "Blob Detector with Tracing", self.max_inertia_ratio)
-        self.detector.params.maxInertiaRatio = self.max_inertia_ratio / 100
+    def update_max_blobs(self, value):
+        self.max_blobs = max(1, min(value, 50))
+        cv2.setTrackbarPos("Max Blobs", "Blob Detector with Tracing", self.max_blobs)
+
+    def update_show_text(self, value):
+        self.show_text = max(0, min(value, 1))
+        cv2.setTrackbarPos("Show Text", "Blob Detector with Tracing", self.show_text)
 
     def update_loop_video(self, value):
         self.loop_video = max(0, min(value, 1))
         cv2.setTrackbarPos("Loop Video", "Blob Detector with Tracing", self.loop_video)
 
-    def update_min_movement_threshold(self, value):
-        self.min_movement_threshold = max(1, min(value, 50))
-        cv2.setTrackbarPos("Min Movement", "Blob Detector with Tracing", self.min_movement_threshold)
+    def update_text_mode(self, value):
+        self.text_mode = max(0, min(value, 2))
+        cv2.setTrackbarPos("Text Mode", "Blob Detector with Tracing", self.text_mode)
 
-    def update_min_movement_threshold_small(self, value):
-        self.min_movement_threshold_small = max(1, min(value, 10))
-        cv2.setTrackbarPos("Min Small Movement", "Blob Detector with Tracing", self.min_movement_threshold_small)
+    def update_show_blobs(self, value):
+        self.show_blobs = max(0, min(value, 1))
+        cv2.setTrackbarPos("Show Blobs", "Blob Detector with Tracing", self.show_blobs)
 
-    def update_alpha(self, value):
-        self.alpha = max(0, min(value, 100))
-        cv2.setTrackbarPos("Alpha", "Blob Detector with Tracing", self.alpha)
+    def update_show_lines(self, value):
+        self.show_lines = max(0, min(value, 1))
+        cv2.setTrackbarPos("Show Lines", "Blob Detector with Tracing", self.show_lines)
